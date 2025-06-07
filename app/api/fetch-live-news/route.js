@@ -11,7 +11,7 @@ export async function GET() {
   }
 
   // Fetch the top 9 headlines from the US in English
-  const url = `https://gnews.io/api/v4/top-headlines?category=general&lang=fr&country=ma&max=12&apikey=${GNEWS_API_KEY}`;
+  const url = `https://gnews.io/api/v4/top-headlines?category=general&lang=en&country=us&max=9&apikey=${GNEWS_API_KEY}`;
 
   try {
     const response = await fetch(url);
