@@ -5,7 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export async function POST(request) {
     const session = await getServerSession(authOptions);
 
-    // Although we're not saving to the DB yet, checking for a session is good practice
+
     if (!session?.user?.email) {
         return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
@@ -17,9 +17,6 @@ export async function POST(request) {
             return NextResponse.json({ error: "Analysis ID and feedback are required." }, { status: 400 });
         }
 
-        // In a real-world scenario, you would save this feedback to your database,
-        // linking it to the analysis and the user.
-        // For now, we'll just log it to the server console to demonstrate functionality.
         console.log(`[Feedback Received]
 - User: ${session.user.email}
 - Analysis ID: ${analysisId}
