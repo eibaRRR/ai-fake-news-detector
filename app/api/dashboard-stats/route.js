@@ -37,7 +37,7 @@ export async function GET() {
         fakeCount,
         authenticCount,
         quizAccuracy,
-        totalQuizQuestionsAnswered: totalAnswered // <-- Add this new field
+        totalQuizQuestionsAnswered: totalAnswered 
     });
 
   } catch (error) {
