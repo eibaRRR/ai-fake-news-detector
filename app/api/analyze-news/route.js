@@ -4,7 +4,7 @@ import { AzureKeyCredential } from "@azure/core-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import clientPromise from "@/lib/mongodb";
-import { google } from 'googleapis'; // Import Google APIs
+import { google } from 'googleapis';
 
 const apiKey = process.env.API_KEY;
 const endpoint = process.env.API_ENDPOINT;
@@ -13,6 +13,33 @@ const createErrorResponse = (message, status) => {
   console.error(`[API /analyze-news] Sending Error Response: ${message}`);
   return NextResponse.json({ error: message }, { status });
 };
+
+// Helper function to convert image URL to base64 data URL
+async function convertImageUrlToBase64(imageUrl) {
+  try {
+    const response = await fetch(imageUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+    }
+    
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.startsWith('image/')) {
+      throw new Error('URL does not point to a valid image');
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
+    return `data:${contentType};base64,${base64}`;
+  } catch (error) {
+    console.error('Error converting image URL to base64:', error);
+    throw new Error(`Unable to process image URL: ${error.message}`);
+  }
+}
 
 export async function POST(request) {
   const session = await getServerSession(authOptions);
@@ -35,6 +62,11 @@ export async function POST(request) {
   try {
     const model = "mistral-ai/mistral-medium-2505";
     const client = ModelClient(endpoint, new AzureKeyCredential(apiKey));
+
+    // Convert image URL to base64 data URL
+    console.log(`[API /analyze-news] Converting image URL to base64: ${imageUrl}`);
+    const base64ImageUrl = await convertImageUrlToBase64(imageUrl);
+    console.log(`[API /analyze-news] Successfully converted image to base64`);
 
     // --- Step 1: Get initial analysis and a search query from the AI ---
     const initialResponse = await client.path("/chat/completions").post({
@@ -71,7 +103,7 @@ export async function POST(request) {
             role: "user",
             content: [
               { type: "text", text: "Analyze this news image for potential misinformation:" },
-              { type: "image_url", image_url: { url: imageUrl } },
+              { type: "image_url", image_url: { url: base64ImageUrl } }, // Use base64 instead of original URL
             ],
           },
         ],
@@ -120,7 +152,7 @@ export async function POST(request) {
       const analysisData = {
         id: analysisId,
         inputType: 'image',
-        inputValue: imageUrl,
+        inputValue: imageUrl, // Store original URL for display purposes
         result: finalResult,
       };
       const mongoClient = await clientPromise;
@@ -134,6 +166,7 @@ export async function POST(request) {
     return NextResponse.json(finalResult);
 
   } catch (error) {
+    console.error(`[API /analyze-news] Error:`, error);
     return createErrorResponse(error.message || "An unknown error occurred.", 500);
   }
 }
