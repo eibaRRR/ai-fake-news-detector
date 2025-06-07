@@ -10,7 +10,7 @@ export async function GET() {
     );
   }
 
-  // Fetch the top 9 headlines from the US in English
+  // Fetch the top 15 headlines from the FR in French
   const url = `https://gnews.io/api/v4/top-headlines?category=general&lang=fr&country=fr&max=15&apikey=${GNEWS_API_KEY}`;
 
   try {
