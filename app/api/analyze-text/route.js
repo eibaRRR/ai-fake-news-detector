@@ -29,7 +29,7 @@ export async function POST(request) {
     // --- Step 1: Get initial analysis and a search query from the AI ---
     const initialResponse = await client.path("/chat/completions").post({
       body: {
-        model: "openai/gpt-4.1",
+        model: "mistral-ai/mistral-medium-2505",
         response_format: { type: "json_object" },
         max_tokens: 2000,
         temperature: 0.1,
