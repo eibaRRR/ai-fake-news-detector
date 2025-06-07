@@ -33,7 +33,7 @@ export async function POST(request) {
   }
 
   try {
-    const model = "openai/gpt-4.1";
+    const model = "mistral-ai/mistral-medium-2505";
     const client = ModelClient(endpoint, new AzureKeyCredential(apiKey));
 
     // --- Step 1: Get initial analysis and a search query from the AI ---
