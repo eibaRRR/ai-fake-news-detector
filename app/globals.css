@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+/* 1. Professional Color Palette (Light & Dark) */
+:root {
+  --background: #ffffff; 
+  --foreground: #111827; /* Tailwind gray-900 */
+  
+  /* Accent colors */
+  --primary: 79, 70, 229;    /* Tailwind indigo-600 */
+  --neutral: 243, 244, 246;  /* Tailwind gray-100 */
+
+  /* Status colors */
+  --success: 22, 163, 74;   /* Tailwind green-600 */
+  --danger: 220, 38, 38;    /* Tailwind red-600 */
+  --success-text: 21, 128, 61; /* Tailwind green-700 */
+  --danger-text: 185, 28, 28;   /* Tailwind red-700 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1f2937; /* Tailwind gray-800 */
+    --foreground: #d1d5db; /* Tailwind gray-300 */
+    
+    /* Accent colors */
+    --primary: 99, 102, 241;   /* Tailwind indigo-500 */
+    --neutral: 31, 41, 55;    /* Tailwind gray-800 */
+
+    /* Status colors */
+    --success: 16, 185, 129;  /* Tailwind emerald-500 */
+    --danger: 239, 68, 68;   /* Tailwind red-500 */
+    --success-text: 52, 211, 153; /* Tailwind emerald-400 */
+    --danger-text: 248, 113, 113; /* Tailwind red-400 */
+  }
+}
+
+/* 2. Make colors available as Tailwind utility classes (e.g., bg-primary, text-danger) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: rgb(var(--primary));
+  --color-neutral: var(--neutral);
+  --color-success: rgb(var(--success));
+  --color-danger: rgb(var(--danger));
+  --color-success-text: rgb(var(--success-text));
+  --color-danger-text: rgb(var(--danger-text));
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* 3. New subtle, dark, and professional background gradient */
+@keyframes gradient-animation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: linear-gradient(225deg, #020617 0%, #111827 50%, #0f172a 100%);
+  background-size: 200% 200%;
+  animation: gradient-animation 30s ease infinite;
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global Styles */
+*, *::before, *::after {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+button:hover, a:hover {
+  transform: translateY(-1px);
+}
+
+button:active, a:active {
+  transform: translateY(0);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(var(--primary), 0.05);
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--primary), 0.4);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--primary), 0.6);
+}
+/* --- Ripple Button Effect --- */
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+  transition: background 400ms;
+  /* Ensure other content on the button stays on top */
+  z-index: 1; 
+}
+
+.ripple-btn .ripple {
+  position: absolute;
+  border-radius: 50%;
+  /* The animation itself */
+  transform: scale(0);
+  animation: ripple-animation 600ms linear;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+.form-input {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: rgba(var(--primary), 0.5);
+  box-shadow: 0 0 0 3px rgba(var(--primary), 0.15);
+}
+
+/* --- Improved Readability for Analysis Text --- */
+.prose-dark {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+}
+
+.prose-dark strong {
+  color: #fff;
+}
