@@ -157,9 +157,10 @@ export async function POST(request) {
       };
       const mongoClient = await clientPromise;
       const db = mongoClient.db();
+      // MODIFICATION: Removed the $slice operator to store all history
       await db.collection("users").updateOne(
         { email: session.user.email },
-        { $push: { history: { $each: [analysisData], $slice: -15 } } }
+        { $push: { history: analysisData } }
       );
     }
 
