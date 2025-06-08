@@ -1,89 +1,55 @@
 import { NextResponse } from "next/server";
 import ModelClient, { isUnexpected } from "@azure-rest/ai-inference";
 import { AzureKeyCredential } from "@azure/core-auth";
-import { google } from 'googleapis';
 
 const apiKey = process.env.API_KEY;
 const endpoint = process.env.API_ENDPOINT;
-
-// Fonction améliorée pour rechercher des titres d'actualité spécifiques
-async function getRealHeadlines(googleSearch, topic) {
-  try {
-    const result = await googleSearch.cse.list({
-      q: `latest ${topic} news headline`,
-      auth: process.env.GOOGLE_API_KEY,
-      cx: process.env.GOOGLE_CSE_ID,
-      num: 4,
-      sort: 'date'
-    });
-    // Filtrer les titres génériques ou trop courts
-    return result.data.items
-      .map(item => item.title)
-      .filter(title => title && !title.includes('|') && !title.includes(' - ') && title.split(' ').length > 5);
-  } catch (error) {
-    console.error(`Google Search failed for topic "${topic}":`, error);
-    return []; // Retourner un tableau vide en cas d'erreur
-  }
-}
 
 export async function GET() {
   if (!apiKey || !endpoint) {
     return NextResponse.json({ error: "Azure AI credentials are not configured." }, { status: 500 });
   }
-
-  const search = google.customsearch('v1');
   
-  // Rechercher dans plusieurs catégories pour une meilleure variété
-  const scienceHeadlines = await getRealHeadlines(search, 'science');
-  const worldHeadlines = await getRealHeadlines(search, 'world');
-  const techHeadlines = await getRealHeadlines(search, 'technology');
-
-  let allHeadlines = [...scienceHeadlines, ...worldHeadlines, ...techHeadlines];
+  // A diverse list of topics for generating unique facts and fictions
+  const quizTopics = [
+    "weird science discoveries", "unusual historical events", "strange animal behavior",
+    "future technology predictions", "deep sea exploration", "space colonization facts",
+    "common misconceptions", "bizarre world records", "cryptocurrency history",
+    "AI capabilities", "archaeological mysteries", "sustainable energy breakthroughs",
+    "human psychology experiments", "the solar system", "ancient civilizations"
+  ];
   
-  // Utiliser une liste de secours si la recherche Google ne retourne rien d'utile
-  if (allHeadlines.length < 5) {
-    allHeadlines.push(
-        "Scientists Discover a New Species of 'Singing' Dog in New Guinea",
-        "Japan's Nikkei index hits all-time high, erasing 1989 bubble-era record",
-        "NASA's Artemis mission confirms water ice on Moon's south pole",
-        "Major international study finds bees can understand the concept of zero",
-        "New deep-sea submersible reaches the deepest point of the Atlantic Ocean"
-    );
-  }
-  
-  // Créer un échantillon aléatoire et unique de titres
-  const uniqueHeadlines = [...new Set(allHeadlines)];
-  const randomSample = uniqueHeadlines.sort(() => 0.5 - Math.random()).slice(0, 5);
-  const headlinesString = randomSample.join("\n");
+  // Select 3 random topics to ensure variety in each quiz
+  const selectedTopics = quizTopics.sort(() => 0.5 - Math.random()).slice(0, 3);
+  const topicsString = selectedTopics.join(", ");
 
   const prompt = `
-    Based on the following real news headlines, generate a quiz with exactly 5 questions.
-    
-    Instructions:
-    1. Create a JSON object with a single key "questions" which contains an array of 5 objects.
-    2. For each object, create a "title" which is a news headline.
-    3. Make 2 of the titles FAKE by plausibly altering the real headlines provided below. Do not just negate them; change a specific detail (e.g., a country, a number, a finding).
-    4. Make the other 3 titles REAL, inspired by the list.
-    5. For each object, add a boolean property "isFake".
-    6. For each object, add a string property "explanation" detailing why the headline is real or fake.
-    7. CRITICAL: Ensure the "title" is a plausible news headline, not a website name or a generic phrase like "Breaking News".
-    
-    Real headlines for inspiration:
-    ${headlinesString}
+    Generate a "Fact or Fiction" quiz with exactly 5 unique questions based on the following themes: ${topicsString}.
 
-    Return ONLY the JSON object. Example format: {"questions": [{"title": "...", "isFake": boolean, "explanation": "..."}, ...]}
+    Instructions:
+    1.  Create a JSON object with a single key "questions", containing an array of 5 unique objects.
+    2.  Each object must have a "title" that is a short, factual-sounding statement.
+    3.  Make 2 of the statements FAKE. They must be plausible but incorrect.
+    4.  Make the other 3 statements REAL and verifiably true.
+    5.  For each statement, add a boolean property "isFake" (true if the statement is false, false if it is true).
+    6.  For each statement, add a string property "explanation" that clearly explains why the statement is true or false. If it's fake, the explanation should provide the correct fact.
+    7.  CRITICAL: The statements must be distinct and not repetitive. They should be interesting and challenging.
+
+    Return ONLY the JSON object. Example format: 
+    {"questions": [{"title": "A shrimp's heart is in its head.", "isFake": false, "explanation": "This is true! A shrimp's heart is located in its cephalothorax, which is the fused head and thorax region."}, ...]}
   `;
 
   try {
     const client = ModelClient(endpoint, new AzureKeyCredential(apiKey));
     const response = await client.path("/chat/completions").post({
       body: {
-        model: "openai/gpt-4.1",
+        // Corrected to use your preferred model
+        model: "mistral-ai/mistral-medium-2505",
         response_format: { type: "json_object" },
         max_tokens: 2000,
-        temperature: 0.7,
+        temperature: 0.9, // Higher temperature for more creative and varied statements
         messages: [
-          { role: "system", content: "You are a helpful assistant that generates quiz questions in JSON format." },
+          { role: "system", content: "You are a creative assistant that generates unique 'Fact or Fiction' quiz questions in JSON format." },
           { role: "user", content: prompt }
         ],
       },
