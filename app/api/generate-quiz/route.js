@@ -43,11 +43,10 @@ export async function GET() {
     const client = ModelClient(endpoint, new AzureKeyCredential(apiKey));
     const response = await client.path("/chat/completions").post({
       body: {
-        // Corrected to use your preferred model
         model: "mistral-ai/mistral-medium-2505",
         response_format: { type: "json_object" },
         max_tokens: 2000,
-        temperature: 0.9, // Higher temperature for more creative and varied statements
+        temperature: 0.9, 
         messages: [
           { role: "system", content: "You are a creative assistant that generates unique 'Fact or Fiction' quiz questions in JSON format." },
           { role: "user", content: prompt }
