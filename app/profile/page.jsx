@@ -9,12 +9,13 @@ import ChangePasswordForm from "@/app/components/ChangePasswordForm";
 import ConfirmationModal from "@/app/components/ConfirmationModal";
 
 export default function ProfilePage() {
-    // 1. Get the 'update' function from useSession
+    // --- THIS IS THE FIX ---
+    // We must get the 'update' function from the useSession hook here.
     const { data: session, status, update } = useSession();
     const router = useRouter();
+    
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [error, setError] = useState('');
-
     const [isEditingName, setIsEditingName] = useState(false);
     const [newName, setNewName] = useState('');
     const [isSaving, setIsSaving] = useState(false);
@@ -63,9 +64,9 @@ export default function ProfilePage() {
                 body: JSON.stringify({ name: newName }),
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
+            if (!res.ok) throw new Error(data.error || "Failed to save new name.");
             
-            // 2. This is the fix: Call update() to refresh the session with the new name
+            // The 'update' function is now defined and can be called here.
             await update({ name: data.newName });
 
             setIsEditingName(false);
