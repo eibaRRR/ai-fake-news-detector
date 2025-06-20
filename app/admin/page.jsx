@@ -129,9 +129,9 @@ export default function AdminDashboardPage() {
             <div className="min-h-screen bg-transparent text-foreground">
                 <main className="container mx-auto px-4 py-8">
                     <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
-                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Tableau de Bord Administrateur</h1>
+                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Dashboard Admin</h1>
                         <Link href="/" className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white dark:bg-neutral/20 hover:bg-gray-100 dark:hover:bg-neutral/30 rounded-lg">
-                            Retour à l'analyseur
+                            Back to Analyzer
                         </Link>
                     </div>
 
