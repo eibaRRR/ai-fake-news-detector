@@ -9,6 +9,7 @@ import ChangePasswordForm from "@/app/components/ChangePasswordForm";
 import ConfirmationModal from "@/app/components/ConfirmationModal";
 
 export default function ProfilePage() {
+    // 1. Get the 'update' function from useSession
     const { data: session, status, update } = useSession();
     const router = useRouter();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -45,7 +46,6 @@ export default function ProfilePage() {
             await signOut({ callbackUrl: '/' });
         } catch (err) {
             setError(err.message);
-            setIsDeleteModalOpen(false);
         }
     };
 
@@ -65,7 +65,9 @@ export default function ProfilePage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
             
+            // 2. This is the fix: Call update() to refresh the session with the new name
             await update({ name: data.newName });
+
             setIsEditingName(false);
         } catch (err) {
             setError(err.message);
