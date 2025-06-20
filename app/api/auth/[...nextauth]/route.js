@@ -9,8 +9,6 @@ import bcrypt from 'bcryptjs';
 export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
   
-  // --- STRATEGY CHANGE ---
-  // We are changing the session strategy to "jwt"
   session: {
     strategy: "jwt",
   },
@@ -57,23 +55,26 @@ export const authOptions = {
     signIn: '/login',
   },
 
-  // --- NEW CALLBACKS FOR JWT STRATEGY ---
   callbacks: {
-    // This callback runs when a JWT is created.
-    async jwt({ token, user }) {
-      // On initial sign in, add the user's role to the token
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update" && session) {
+        if (session.name) token.name = session.name;
+        if (session.email) token.email = session.email;
+        if (session.role) token.role = session.role;
+      }
       if (user) {
         token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
         token.role = user.role;
       }
       return token;
     },
-
-    // This callback runs when a session is accessed.
     async session({ session, token }) {
-      // Add the role from the token to the session object
-      if (session?.user) {
+      if (session?.user && token) {
         session.user.id = token.id;
+        session.user.name = token.name;
+        session.user.email = token.email;
         session.user.role = token.role;
       }
       return session;
